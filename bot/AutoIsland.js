@@ -1,7 +1,7 @@
 const States = require('./States/States.js');
 const Item = require('./Item.js');
 const { getConfig } = require("../config.js");
-const { sleep } = require('./Utils.js');
+const { sleep, betterOnce } = require('./Utils.js');
 
 let { visitFriend } = getConfig();
 
@@ -12,6 +12,7 @@ class AutoIsland {
         this.currentlyConfirming = true;
         this.onIsland = false;
         this.baseMessage = "Private Island";
+        this.whenReadyCallback = null;
 
         this.checkLocraw = this.checkLocraw.bind(this);
         this.bot.on('spawn', this.checkLocraw);
@@ -34,7 +35,6 @@ class AutoIsland {
             try {
                 try { var locraw = JSON.parse(message) } catch { return }
                 foundLocraw = true;
-                console.log(`Found locraw yay ${message}`);
                 this.bot.off('message', check);
                 if (locraw.server === 'limbo') {
                     this.move('/l');
@@ -50,27 +50,39 @@ class AutoIsland {
                         this.bot.chat(`/visit ${visitFriend}`);
                         await betterOnce(this.bot, 'windowOpen');
                         await sleep(150);
-                        let lore = new Item(this.bot.currentWindow?.slots[11]).getLore({ noColorCodes: true });
-                        if (!lore) {
-                            lore = new Item(this.bot.currentWindow?.slots[13]).getLore({ noColorCodes: true });
-                        }
-                        if (lore.includes('Island disallows guests!')) {
-                            visitFriend = false;
-                            console.log(`§6[§bTPM§6] §cHey so this person has invites off :(`);
-                            this.checkLocraw();
-                            this.move('/hub');//ok we gotta go to hub so that it realizes something changed
-                            return;
-                        }
                         this.bot.betterClick(11, 0, 0);
+
+                        try {
+                            console.log(`Started betterOnce`);
+                            await betterOnce(this.bot, 'message', (message, type) => {
+                                if (type !== 'chat') return;
+                                const text = message.getText(null);
+                                if (text == `This island doesn't allow everyone to guest!`) {
+                                    visitFriend = false;
+                                    console.log(`§6[§bTPM§6] §cHey so this person has invites off :(`);
+                                    this.checkLocraw();
+                                    this.move('/hub');//ok we gotta go to hub so that it realizes something changed
+                                    return true;
+                                }
+                            }, 5_000);
+                        } catch (e) {
+                            console.log(e);
+                        }
                     } else {
-                        console.log('Made it to the island!');
                         this.onIsland = true;
                         this.state.set(States.WAITING);
+                        if (this.whenReadyCallback) {
+                            this.whenReadyCallback();
+                            this.whenReadyCallback = null;
+                        }
                     }
                 } else if (this.state.get() === States.MOVING) {
-                    console.log('Made it to the island!');
                     this.onIsland = true;
                     this.state.set(States.WAITING);
+                    if (this.whenReadyCallback) {
+                        this.whenReadyCallback();
+                        this.whenReadyCallback = null;
+                    }
                 }
             } catch (e) {
                 console.error(e);
@@ -91,7 +103,6 @@ class AutoIsland {
     async move(place) {
         this.onIsland = false;
         await sleep(3000);
-        console.log(`Moving to ${place}`);
         this.bot.chat(place);
         this.state.set('moving');
         this.currentlyConfirming = true;
@@ -100,6 +111,10 @@ class AutoIsland {
 
     onIslandCheck() {
         return this.onIsland;
+    }
+
+    whenReady(callback) {
+        this.whenReadyCallback = callback;
     }
 
 }

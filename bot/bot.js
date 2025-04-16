@@ -12,7 +12,7 @@ async function makeBot(ign) {
 
         bot.betterClick = function (slot, mode1 = 0, mode2 = 0) {
             if (!bot.currentWindow) {
-                debug(`No window found for clicking ${slot}`);
+                console.log(`No window found for clicking ${slot}`);
                 return;
             }
 
@@ -23,7 +23,7 @@ async function makeBot(ign) {
         bot.betterWindowClose = function () {
 
             if (!bot.currentWindow) {
-                debug(`No window found for closing`);
+                console.log(`No window found for closing`);
                 return;
             }
 

@@ -4,6 +4,9 @@ const OrderManager = require('./Orders/OrderManager.js');
 const StateManager = require('./States/StateManager.js');
 const MessageHandler = require('./MessageHandler.js');
 const AutoIsland = require('./AutoIsland.js');
+const CleanerUpper = require('./CleanerUpper.js');
+const InventoryManager = require('./InventoryManager.js');
+const StashManager = require('./StashManager.js');
 
 const config = getConfig();
 
@@ -15,6 +18,9 @@ class MacroBot {
         this.orderManager = null;
         this.stateManager = null;
         this.messageHandler = null;
+        this.cleanUp = null;
+        this.inventoryManger = null;
+        this.stashManager = null;
         this.autoIsland = null;
     }
 
@@ -22,9 +28,18 @@ class MacroBot {
         this.bot = await makeBot(this.ign);
 
         this.stateManager = new StateManager(this.bot);
+        this.inventoryManger = new InventoryManager(this.bot);
         this.orderManager = new OrderManager(this.bot);
         this.messageHandler = new MessageHandler(this.bot, this.stateManager, this.orderManager);
         this.autoIsland = new AutoIsland(this.bot, this.stateManager);
+        this.stashManager = new StashManager(this.bot, this.stateManager, this.inventoryManger);
+        this.cleanUp = new CleanerUpper(this.bot, this.stateManager, this.stashManager);
+
+        this.autoIsland.whenReady(() => {
+            console.log('ready')
+            this.cleanUp.clean();
+        })
+
     }
 
 }

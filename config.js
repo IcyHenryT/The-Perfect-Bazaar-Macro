@@ -5,7 +5,8 @@ const CONFIG_PATH = path.join(__dirname, "config.json");
 
 const defaultConfig = {
     igns: [],
-    webhooks: []
+    webhooks: [],
+    visitFriend: ""
     //TODO this shit lmao
 }
 
