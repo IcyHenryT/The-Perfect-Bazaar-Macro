@@ -1,5 +1,5 @@
 const OrderType = require('./OrderType.js');
-const Item = require('./Item.js');
+const Item = require('../Item.js');
 
 class Order {
 

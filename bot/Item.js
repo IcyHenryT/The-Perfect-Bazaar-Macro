@@ -1,7 +1,22 @@
 class Item {
 
-    constructor(id) {
-        this.id = id;
+    constructor(slot) {
+        this.slot = slot;
+        this.nbt = simplifyNbt(slot.nbt);
+    }
+
+    getNbt() {
+        return this.nbt;
+    }
+
+    getLore(options = {}) {
+        const lore = this.nbt.Display.lore;
+
+        if (options.noColorCodes) {
+            return lore.map(line => line.replace(/§./, ""))
+        }
+
+        return lore;
     }
 
     getProfit() {
@@ -30,7 +45,7 @@ class Item {
         if (!id) {
             throw new Error(`Item ID not found in NBT: ${JSON.stringify(nbt)}`);
         }
-        
+
         return new Item(id);
     }
 

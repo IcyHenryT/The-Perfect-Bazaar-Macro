@@ -1,7 +1,8 @@
 const prompt = require('prompt-sync')();
 const { updateConfig, getConfig } = require('./config.js');
-const MacroBot = require('./bot/Macro.js');
+const MacroBot = require('./bot/MacroBot.js');
 let config = getConfig();
+let bots = {};
 
 function checkConfig() {
 
@@ -13,7 +14,7 @@ function checkConfig() {
             return checkIgn();
         }
 
-        updateConfig({ igns: answer })
+        updateConfig({ igns: [answer] })
         config = getConfig();
     }
 
@@ -21,7 +22,16 @@ function checkConfig() {
 }
 
 async function initBot() {
+    console.log(`Starting bots`);
 
+    for (const ign of config.igns) {
+        const bot = new MacroBot(ign);
+
+        bots[ign] = bot;
+        await bot.init();
+    }
 }
 
 checkConfig();
+
+initBot();

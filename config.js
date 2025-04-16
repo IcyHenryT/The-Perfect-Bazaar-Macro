@@ -23,7 +23,7 @@ let config = { ...defaultConfig, ...fileConfig };
 function updateConfig(newConfig) {
     if (typeof newConfig === "string") newConfig = JSON.parse(newConfig);
 
-    config = { ...newConfig, ...config };
+    config = { ...config, ...newConfig };
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), "utf-8");
 }
 

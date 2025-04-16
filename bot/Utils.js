@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const sleep = (ms => new Promise(resolve => setTimeout(resolve, ms)));
+
 async function multipleAttempts(func, attempts = 3) {
     let lastError = null;
     
@@ -18,4 +20,4 @@ async function getUUID(ign) {
     return (await axios.get(`https://api.mojang.com/users/profiles/minecraft/${ign}`)).data.id;
 }
 
-module.exports = { multipleAttempts, getUUID };
+module.exports = { multipleAttempts, getUUID, sleep };
