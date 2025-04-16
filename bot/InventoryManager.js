@@ -9,20 +9,49 @@ class InventoryManager {
         return this.bot.inventory.slots.map(item => new Item(item));
     }
 
+    getWindow() {
+        return this.bot.currentWindow ? 
+            this.bot.currentWindow.slots.map(item => new Item(item)) : 
+            [];
+    }
+
     getSlot(options = {}) {
-        const { uuid, id, name, num } = options;
-        const inventory = this.getInventory();
+        const inventory = options.window ? this.getWindow() : this.getInventory();
 
         const slot = inventory.find(item => {
-            if (uuid && item.getUuid() !== uuid) return false;
-            if (id && item.getId() !== id) return false;
-            if (name && item.getName({ noColorCodes: true }) !== name) return false;
-            if (name && item.getName({ noColorCodes: false }) !== name) return false;
-            if (num && item.slotNum !== num) return false;
-            return true;
+            if (!item?.slot) return false;
+            let valid = true;
+
+            //Essentially creates an "and" statement
+            for (const key in options) {
+                let value = options[key];
+
+                switch (key) {
+                    case "name":
+                        valid = item.getName({ noColorCodes: true }) === value || item.getName({ noColorCodes: false }) === value;
+                        break;
+                    case "nameIncludes":
+                        valid = item.getName({ noColorCodes: true }).includes(value) || item.getName({ noColorCodes: false }).includes(value);
+                        break;
+                    case "uuid":
+                        valid = item.getUuid() === value;
+                        break;
+                    case "id":
+                        valid = item.getId() === value;
+                        break;
+                    case "loreIncludes":
+                        valid = item.getLore({ noColorCodes: true })?.includes(value) || item.getLore({ noColorCodes: false })?.includes(value);
+                        break;
+                    case "num":
+                        valid = item.slotNum === value;
+                        break;
+                }
+            }
+
+            return valid;
         });
 
-        return slot;
+        return slot || null;
     }
 
 }

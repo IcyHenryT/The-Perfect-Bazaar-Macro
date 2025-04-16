@@ -19,7 +19,7 @@ class MacroBot {
         this.stateManager = null;
         this.messageHandler = null;
         this.cleanUp = null;
-        this.inventoryManger = null;
+        this.inventoryManager = null;
         this.stashManager = null;
         this.autoIsland = null;
     }
@@ -28,12 +28,12 @@ class MacroBot {
         this.bot = await makeBot(this.ign);
 
         this.stateManager = new StateManager(this.bot);
-        this.inventoryManger = new InventoryManager(this.bot);
+        this.inventoryManager = new InventoryManager(this.bot);
         this.orderManager = new OrderManager(this.bot);
         this.messageHandler = new MessageHandler(this.bot, this.stateManager, this.orderManager);
         this.autoIsland = new AutoIsland(this.bot, this.stateManager);
         this.stashManager = new StashManager(this.bot, this.stateManager, this.inventoryManger);
-        this.cleanUp = new CleanerUpper(this.bot, this.stateManager, this.stashManager);
+        this.cleanUp = new CleanerUpper(this.bot, this.stateManager, this.stashManager, this.inventoryManager);
 
         this.autoIsland.whenReady(() => {
             console.log('ready')

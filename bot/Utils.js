@@ -41,6 +41,8 @@ async function betterOnce(listener, event, callback, timeframe = 5000) {
 }
 
 function simplifyNbt(data) {//I stole this straight from prismarine-nbt I can't lie but like I didn't want another dependency cause like exe gets really big so I just did this
+    if (!data) return data;
+    
     const transform = (value, type) => {
         if (type === 'compound') {
             return Object.keys(value).reduce((acc, key) => {

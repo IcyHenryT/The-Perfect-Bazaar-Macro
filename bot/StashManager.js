@@ -33,13 +33,10 @@ class StashManager {
 
         try {
             await this.openStash('material');
-            
-            if (!bot.currentWindow) {
-                console.log(`Stash is already empty :)`)
-                return;
-            }
 
-            const sellButton = inventoryManager.getSlot({ name: "Sell Stash Now" });
+            if (!bot.currentWindow) return;
+
+            const sellButton = inventoryManager.getSlot({ window: true, name: "Sell Stash Now" });
 
             bot.betterClick(sellButton.slotNum);
             await betterOnce(bot, 'windowOpen');

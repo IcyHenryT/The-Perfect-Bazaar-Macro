@@ -4,8 +4,8 @@ class Item {
 
     constructor(slot) {
         this.slot = slot;
-        this.slotNum = slot.slot;
-        this.nbt = simplifyNbt(slot.nbt);
+        this.slotNum = slot?.slot;
+        this.nbt = simplifyNbt(slot?.nbt);
     }
 
     getNbt() {
@@ -13,10 +13,10 @@ class Item {
     }
 
     getLore(options = {}) {
-        const lore = this.nbt.display.Lore;
+        const lore = this.nbt?.display?.Lore;
 
         if (options.noColorCodes) {
-            return lore.map(line => line.replace(/§./, ""))
+            return lore?.map(line => line?.replace(/§./, ""))
         }
 
         return lore;
@@ -42,7 +42,7 @@ class Item {
         const split = id?.split('_');
         const first = split[0];
         if (first === 'RUNE' || first === "UNIQUE") {//Don't want to list incorrect rune
-            id = `${Object.keys(ExtraAttributes?.runes)[0]}_RUNE`;
+            id = `${Object.keys(ExtraAttributes.runes)[0]}_RUNE`;
         }
         return id;
     }
