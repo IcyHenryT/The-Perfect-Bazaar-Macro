@@ -32,7 +32,7 @@ class MacroBot {
         this.orderManager = new OrderManager(this.bot);
         this.messageHandler = new MessageHandler(this.bot, this.stateManager, this.orderManager);
         this.autoIsland = new AutoIsland(this.bot, this.stateManager);
-        this.stashManager = new StashManager(this.bot, this.stateManager, this.inventoryManger);
+        this.stashManager = new StashManager(this.bot, this.stateManager, this.inventoryManager);
         this.cleanUp = new CleanerUpper(this.bot, this.stateManager, this.stashManager, this.inventoryManager);
 
         this.autoIsland.whenReady(() => {

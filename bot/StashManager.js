@@ -1,5 +1,5 @@
 const States = require('./States/States.js');
-const { betterOnce } = require('./Utils.js');
+const { betterOnce, sleep } = require('./Utils.js');
 
 class StashManager {
     constructor(bot, state, InventoryManager) {
