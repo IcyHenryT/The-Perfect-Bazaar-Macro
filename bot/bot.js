@@ -32,7 +32,7 @@ async function makeBot(ign) {
         };
 
         bot.editSign = function (lines) {
-            if (typeof lines === 'string') lines = [lines, "", "", ""];
+            if (typeof lines === 'string') lines = [lines, "  ^^Flipping^^  ", " Previous Price: ", "60.3/u"];
 
             bot._client.write('update_sign', {
                 location: bot.entity.position.offset(-1, 0, 0),

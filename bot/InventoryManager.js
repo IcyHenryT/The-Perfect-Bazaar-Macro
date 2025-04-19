@@ -10,8 +10,8 @@ class InventoryManager {
     }
 
     getWindow() {
-        return this.bot.currentWindow ? 
-            this.bot.currentWindow.slots.map(item => new Item(item)) : 
+        return this.bot.currentWindow ?
+            this.bot.currentWindow.slots.map(item => new Item(item)) :
             [];
     }
 
@@ -40,7 +40,7 @@ class InventoryManager {
                         valid = item.getId() === value;
                         break;
                     case "loreIncludes":
-                        valid = item.getLore({ noColorCodes: true })?.includes(value) || item.getLore({ noColorCodes: false })?.includes(value);
+                        valid = item.getLore({ noColorCodes: true })?.join('\n')?.includes(value) || item.getLore({ noColorCodes: false })?.join('\n')?.includes(value);
                         break;
                     case "num":
                         valid = item.slotNum === value;

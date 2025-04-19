@@ -16,7 +16,7 @@ class Item {
         const lore = this.nbt?.display?.Lore;
 
         if (options.noColorCodes) {
-            return lore?.map(line => line?.replace(/§./, ""))
+            return lore?.map(line => line?.replace(/§./g, ""))
         }
 
         return lore;
@@ -50,7 +50,7 @@ class Item {
     getName(options = {}) {
         const name = this.nbt.display.Name;
 
-        return options.noColorCodes ? name.replace(/§./, "") : name;
+        return options.noColorCodes ? name.replace(/§./g, "") : name;
     }
 
     getProfit() {
