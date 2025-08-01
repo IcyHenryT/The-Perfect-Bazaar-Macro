@@ -47,8 +47,7 @@ class AutoIsland {
                     let ownIsland = scoreboard.find(line => line?.includes('Your Island'));
                     if (!guests || ownIsland) {
                         this.bot.chat(`/visit ${visitFriend}`);
-                        await betterOnce(this.bot, 'windowOpen');
-                        await sleep(150);
+                        await this.bot.newWindow("Visit");
                         this.bot.betterClick(11, 0, 0);
 
                         try {

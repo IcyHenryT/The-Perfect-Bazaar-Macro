@@ -6,6 +6,9 @@ class StashManager {
         this.bot = bot;
         this.state = state;
         this.inventoryManager = InventoryManager;
+
+        this.MATERIAL = "material";
+        this.ITEM = "item";
     }
 
     async openStash(type) {
@@ -15,7 +18,7 @@ class StashManager {
         try {
             bot.chat(`/viewstash ${type}`);
             try {
-                await betterOnce(bot, 'windowOpen')
+                await bot.newWindow("View Stash");
             } catch {
                 console.log(`Stash is already empty :)`)
             };
@@ -32,14 +35,14 @@ class StashManager {
         const { bot, inventoryManager } = this;
 
         try {
-            await this.openStash('material');
+            await this.openStash(this.MATERIAL);
 
             if (!bot.currentWindow) return;
 
             const sellButton = inventoryManager.getSlot({ window: true, name: "Sell Stash Now" });
 
             bot.betterClick(sellButton.slotNum);
-            await betterOnce(bot, 'windowOpen');
+            await bot.newWindow("Are you sure?");
 
             bot.betterClick(11);
             await sleep(500);

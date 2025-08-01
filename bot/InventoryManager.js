@@ -1,4 +1,5 @@
 const Item = require('./Item.js');
+const { getWindowName } = require('./Utils.js');
 
 class InventoryManager {
     constructor(bot) {
@@ -15,6 +16,13 @@ class InventoryManager {
             [];
     }
 
+    getName(options = {}) {
+        if (!this.bot.currentWindow) return null;
+        return options.noColorCodes ? 
+            getWindowName(this.bot.currentWindow).replace(/§./g, "") :
+            getWindowName(this.bot.currentWindow);
+    }
+
     getSlot(options = {}) {
         const inventory = options.window ? this.getWindow() : this.getInventory();
 
@@ -22,7 +30,7 @@ class InventoryManager {
             if (!item?.slot) return false;
             let valid = true;
 
-            //Essentially creates an "and" statement
+            //Essentially creates an "and" statement for all options
             for (const key in options) {
                 let value = options[key];
 
@@ -46,6 +54,8 @@ class InventoryManager {
                         valid = item.slotNum === value;
                         break;
                 }
+
+                if (!valid) break;
             }
 
             return valid;

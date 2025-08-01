@@ -29,15 +29,23 @@ class MacroBot {
 
         this.stateManager = new StateManager(this.bot);
         this.inventoryManager = new InventoryManager(this.bot);
-        this.orderManager = new OrderManager(this.bot);
+        this.orderManager = new OrderManager(this.bot, this.stateManager, this.inventoryManager);
         this.messageHandler = new MessageHandler(this.bot, this.stateManager, this.orderManager);
         this.autoIsland = new AutoIsland(this.bot, this.stateManager);
         this.stashManager = new StashManager(this.bot, this.stateManager, this.inventoryManager);
         this.cleanUp = new CleanerUpper(this.bot, this.stateManager, this.stashManager, this.inventoryManager);
 
-        this.autoIsland.whenReady(() => {
+        this.bot._client.on('open_window', async (window) => {
+            const windowName = window.windowTitle;
+            console.log(windowName);
+        })
+
+        this.autoIsland.whenReady(async () => {
             console.log('ready')
-            this.cleanUp.clean();
+            await this.cleanUp.clean();
+
+            await this.orderManager.setUp();
+            console.log(this.orderManager.orders.map(order => `${order.item.getName({ noColorCodes: true})}:${order.size}`));
         })
 
     }

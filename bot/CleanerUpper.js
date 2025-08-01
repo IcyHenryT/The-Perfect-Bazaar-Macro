@@ -1,5 +1,7 @@
+const OrderType = require('./Orders/OrderType.js');
+const Order = require('./Orders/Order.js');
 const States = require('./States/States.js');
-const { betterOnce, sleep } = require('./Utils.js');
+const { sleep } = require('./Utils.js');
 
 class CleanerUpper {
     constructor(bot, state, stash, inventoryManager) {
@@ -17,11 +19,10 @@ class CleanerUpper {
         try {
             await stash.clearMaterials();
 
-            //Open BZ
             try {
-                bot.chat(`/managebazaarorders`);
-                await betterOnce(bot, 'windowOpen');
-                console.log(`starting to claim sold orders`);
+                await bot.ensureOrdersOpen();
+
+                console.log(`Starting to claim sold orders`);
 
                 await this.claimAllSoldOrders();
 
@@ -31,34 +32,32 @@ class CleanerUpper {
                 bot.betterClick(closeButton.slotNum);
                 console.log(`Clicking sold`);
 
-
                 console.log(`Starting to sell inv`);
-                //Click sell entire inventory
-                await betterOnce(bot, 'windowOpen');
+
+                await bot.newWindow("Bazaar");
                 bot.betterClick(47);
 
                 try {
-                    //Click confirm
-                    await betterOnce(bot, 'windowOpen');
+                    await bot.newWindow("Are you sure?");
                     bot.betterClick(11);
-                    await betterOnce(bot, 'windowOpen');
+                    await bot.newWindow("Bazaar");
                 } catch (e) {
-                    console.log(`Error selling inv, probably not items`, e);
+                    console.log(`Error selling inv, probably no items`, e);
                 }
 
                 console.log(`sold inv`);
 
-                //Open orders again
                 bot.betterClick(50);
-                await betterOnce(bot, 'windowOpen');
+                await bot.newWindow("Bazaar Orders");
 
-                this.flipAllOrders();
+                await this.flipAllOrders();
 
             } catch (e) {
                 console.log(`Error with claiming BZ`, e);
             }
         } catch (e) {
             console.error(`Error while cleaning:`, e);
+        } finally {
             state.set(States.WAITING);
             bot.betterWindowClose();
         }
@@ -88,38 +87,14 @@ class CleanerUpper {
     async flipOneOrder() {
         return new Promise(async (resolve) => {
             console.log(`Starting to flip order`);
-            const order = this.inventoryManager.getSlot({ window: true, nameIncludes: "BUY", loreIncludes: "100%" });
-            console.log(order);
-            if (!order) return resolve(false);
+            const orderSlot = this.inventoryManager.getSlot({ window: true, nameIncludes: OrderType.BUY, loreIncludes: "100%" });
 
-            const itemName = order.getName({ noColorCodes: true }).split(" ").splice(1).join(" ");
+            if (!orderSlot) return resolve(false);
 
-            console.log(`${itemName} is 100%, flipping`);
-            this.bot.betterClick(order.slotNum, 1, 0);
+            const order = new Order(orderSlot, this.bot, this.state, this.inventoryManager);
 
-            await betterOnce(this.bot, 'windowOpen');
-            const activeOrders = this.inventoryManager.getSlot({ window: true, num: 15 }).getLore({ noColorCodes: true });
-            console.log(activeOrders);
-            let orderPrice;
-            for (const order of activeOrders) {
-                if (!order.includes('each')) continue;
-                orderPrice = parseFloat(order.split(' ')[1]);
-                break;
-            }
-
-            console.log(`Order price: ${orderPrice}`);
-            if (!orderPrice || isNaN(orderPrice)) {
-                console.log(`No order price found for ${itemName}`);
-                return resolve(false);
-            }
-
-            this.bot.betterClick(15, 0, 0);
-            await this.bot.waitForTicks(3);
-
-            this.bot.editSign((orderPrice - 0.1).toString());
-            await betterOnce(this.bot, 'windowOpen');
-
-            return resolve(true);
+            await order.flip()
+            resolve(true)
         })
     }
 }

@@ -16,6 +16,10 @@ async function multipleAttempts(func, attempts = 3) {
     throw lastError;
 }
 
+function onlyNumbers(text) {
+    return parseFloat(text.replace(/[^\d,]/g, '').replace(/,/g, ''), 10);
+}
+
 async function getUUID(ign) {
     return (await axios.get(`https://api.mojang.com/users/profiles/minecraft/${ign}`)).data.id;
 }
@@ -40,6 +44,15 @@ async function betterOnce(listener, event, callback, timeframe = 5000) {
     });
 }
 
+function getWindowName(window) {
+    if (!window) return null;
+    try {
+        return JSON.parse(window.title).extra[0].text;
+    } catch (e) {
+        return null;
+    }
+}
+
 function simplifyNbt(data) {//I stole this straight from prismarine-nbt I can't lie but like I didn't want another dependency cause like exe gets really big so I just did this
     if (!data) return data;
     
@@ -58,4 +71,4 @@ function simplifyNbt(data) {//I stole this straight from prismarine-nbt I can't 
     return transform(data.value, data.type)
 }
 
-module.exports = { multipleAttempts, getUUID, sleep, betterOnce, simplifyNbt };
+module.exports = { multipleAttempts, getUUID, sleep, betterOnce, simplifyNbt, getWindowName, onlyNumbers };

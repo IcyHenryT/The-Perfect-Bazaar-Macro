@@ -1,24 +1,55 @@
 const Order = require('./Order.js');
+const OrderType = require('./OrderType.js');
+const States = require('../States/States.js');
 
 class OrderManager {
 
-    constructor(bot) {
+    constructor(bot, stateManager, inventoryManager) {
+        this.stateManager = stateManager;
         this.bot = bot;
+        this.inventoryManager = inventoryManager;
         this.orders = [];
+
+        this.addOrder = this.addOrder.bind(this);
     }
 
-    addOrder(nbt) {
-        this.orders.push(new Order(nbt));
+    addOrder(item) {
+        this.orders.push(new Order(item, this.bot, this.stateManager, this.inventoryManager));
     }
 
-    async removeOrder(nbt) {
-        for (let i = 0; i < this.orders.length; i++) {
-            const order = this.orders[i];
-            if (order.nbt === nbt) {
+    async removeOrder(item) {
+        this.orders = this.orders.filter(async order => {
+            if (order.nbt == item.nbt) {
                 if (!order.wasClaimed()) await order.cancelOrder();
-                this.orders.splice(i, 1);
-                break;
+                return false;
             }
+            return true;
+        })
+    }
+
+    async setUp() {
+        console.log(`Starting to setup`);
+
+        const { stateManager, bot, inventoryManager } = this;
+        stateManager.set(States.CLEANING);
+        try {
+
+            await bot.ensureOrdersOpen();
+            
+            const window = inventoryManager.getWindow();
+
+            window.forEach(item => {
+                let name = item.getName({ noColorCodes: true});
+                let isOrder = name?.includes(OrderType.BUY) || name?.includes(OrderType.SELL);
+
+                if (isOrder) this.addOrder(item);
+            });
+            
+        } catch(e) {
+            console.error(`Error setting up orders`, e);
+        } finally {
+            stateManager.set(States.WAITING);
+            bot.betterWindowClose();
         }
     }
 }

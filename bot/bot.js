@@ -1,5 +1,5 @@
 const mineflayer = require('mineflayer');
-const { getUUID } = require('./Utils.js');
+const { getUUID, betterOnce, getWindowName } = require('./Utils.js');
 
 async function makeBot(ign) {
     return new Promise(async (resolve) => {
@@ -27,9 +27,18 @@ async function makeBot(ign) {
                 return;
             }
 
+            console.log(`Closing window`);
+
             try { bot.closeWindow(bot.currentWindow) } catch { };
 
         };
+
+        bot.newWindow = async function (name = '') {
+            await betterOnce(bot, 'windowOpen');
+            const windowName = getWindowName(bot.currentWindow);
+            if (!windowName.includes(name)) throw new Error(`While waiting for ${name} we got ${windowName}`);
+            return windowName;
+        }
 
         bot.editSign = function (lines) {
             if (typeof lines === 'string') lines = [lines, "  ^^Flipping^^  ", " Previous Price: ", "60.3/u"];
@@ -71,6 +80,24 @@ async function makeBot(ign) {
             bot.recentPurse = purse;
             return purse;
         };
+
+        bot.ensureOrdersOpen = async function () {
+            let attempts = 0;
+            while (!getWindowName(bot.currentWindow)?.includes("Bazaar Orders") && attempts < 3) {
+                if (bot.currentWindow) {
+                    bot.betterWindowClose();
+                    await bot.waitForTicks(3);
+                }
+                bot.chat('/managebazaarorders');
+                try { await bot.newWindow("Bazaar Orders") } catch {};
+                attempts++
+            }
+
+            if (!getWindowName(bot.currentWindow)?.includes("Bazaar Orders")) {
+                throw new Error(`Failed to open bazaar orders after 3 tries`);
+            }
+            return true;
+        }
 
         bot.once("login", async () => {
             if (!bot.uuid) bot.uuid = await getUUID(ign);

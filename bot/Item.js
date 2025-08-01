@@ -6,6 +6,8 @@ class Item {
         this.slot = slot;
         this.slotNum = slot?.slot;
         this.nbt = simplifyNbt(slot?.nbt);
+
+        this.refindSlot = this.refindSlot.bind(this);
     }
 
     getNbt() {
@@ -48,9 +50,19 @@ class Item {
     }
 
     getName(options = {}) {
-        const name = this.nbt.display.Name;
+        const name = this.nbt?.display?.Name;
 
-        return options.noColorCodes ? name.replace(/§./g, "") : name;
+        return options.noColorCodes ? name?.replace(/§./g, "") : name;
+    }
+
+    refindSlot(window) {
+        return window.slots.find(slot => {
+            let item = new Item(slot);
+            return item.nbt == this.nbt;
+        }) || window.slots.find(slot => {
+            let item = new Item(slot);
+            return item.getId() == this.getId();
+        })
     }
 
     getProfit() {
